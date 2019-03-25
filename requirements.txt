@@ -1,0 +1,6 @@
+ohcount
+gitPython
+matplotlib
+pandas
+seaborn
+numpy
