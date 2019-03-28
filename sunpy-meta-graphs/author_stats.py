@@ -7,7 +7,7 @@ sns.set()
 
 import sunpy_meta
 
-repo_path = '/Users/sdchris1/Developer/repositories/sunpy'
+repo_path = sunpy_meta.repo_path
 repo = Repo(repo_path)
 
 
