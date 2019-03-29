@@ -2,13 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytz
-import seaborn as sns
 from git import Repo
 
 import sunpy_meta
 from parse_mailmap import get_author_transform_mapping
-
-sns.set()
 
 repo_path = sunpy_meta.repo_path
 repo = Repo(repo_path)
