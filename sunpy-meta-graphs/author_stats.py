@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use("pgf")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -6,6 +8,30 @@ from git import Repo
 
 import sunpy_meta
 from parse_mailmap import get_author_transform_mapping
+
+import seaborn
+seaborn.set_context("paper")
+seaborn.set_style("white")
+seaborn.set_style("ticks")
+
+
+def add_releases(ax1):
+    release_times = [pd.to_datetime(s) for s in sunpy_meta.sunpy_releases.values()]
+    _, _, _, ymax = ax1.axis()
+    ax2 = ax1.twiny()
+    ax2.plot(release_times,
+             [ymax-1]*len(release_times), ".", alpha=0)
+    ax2.set_xticks(release_times)
+    ax2.set_xticklabels(sunpy_meta.sunpy_releases.keys())
+    ax2.minorticks_off()
+    ax2.set_xlabel("SunPy Releases")
+    for this_release in release_times:
+        ax2.axvline(
+            this_release,
+            color='black',
+            linestyle='--',
+            linewidth=0.1)
+
 
 repo_path = sunpy_meta.repo_path
 repo = Repo(repo_path)
@@ -27,23 +53,26 @@ temp = data['author'].resample('M').apply(set)
 x = pd.DataFrame(data={'set': temp.values}, index=temp.index)
 x['count'] = [len(v) for v in x['set'].values]
 
+
+
+
+
 # author commits
+
+fig, ax1 = plt.subplots()
 x['count'].plot(ls='steps')
 plt.ylabel('Committers per month')
-for this_release in sunpy_meta.sunpy_releases:
-    plt.axvline(
-        pd.to_datetime(sunpy_meta.sunpy_releases[this_release]),
-        color='black',
-        alpha=0.5,
-        linestyle='--')
-    plt.text(
-        pd.to_datetime(sunpy_meta.sunpy_releases[this_release]),
-        16,
-        this_release,
-        size='smaller')
+
+add_releases(ax1)
 plt.savefig('committers_per_month_vs_time.pdf')
 
-plt.figure()
+
+
+
+
+
+
+fig, ax1 = plt.subplots()
 # now plot cumulative authors as a function of time
 a = set()
 result = []
@@ -55,22 +84,16 @@ for i in range(len(x['set'].values)):
     result.append(len(set(a)))
 cum_authors = pd.Series(data=result, index=temp.index)
 cum_authors.plot()
-plt.ylabel('Cumulative Authors')
+ax1.set_ylabel('Cumulative Authors')
 
-for this_release in sunpy_meta.sunpy_releases:
-    plt.axvline(
-        pd.to_datetime(sunpy_meta.sunpy_releases[this_release]),
-        color='black',
-        alpha=0.5,
-        linestyle='--')
-    plt.text(
-        pd.to_datetime(sunpy_meta.sunpy_releases[this_release]),
-        140,
-        this_release,
-        size='smaller')
+add_releases(ax1)
 plt.savefig('cumulative_authors.pdf')
 
-plt.figure()
+
+
+
+
+fig, ax1 = plt.subplots()
 # now create a plot of the number of commits versus the number of committers
 author_count = data.groupby('author').apply(lambda x: len(x))
 # author_count.sort_values('author', inplace=True)
@@ -93,6 +116,7 @@ plt.ylabel('number of committers')
 plt.xlabel('number of commits')
 
 plt.title('')
+seaborn.despine()
 plt.savefig("busfactor_plot.pdf")
 
 plt.show()
